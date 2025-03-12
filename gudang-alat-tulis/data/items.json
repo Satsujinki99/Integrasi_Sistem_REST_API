@@ -1,14 +1,20 @@
 [
   {
-    "id": 1,
-    "name": "Pensil",
-    "quantity": 50,
-    "price": 2000
-  },
-  {
     "id": 2,
     "name": "Pulpen",
     "quantity": 30,
     "price": 5000
+  },
+  {
+    "id": 3,
+    "name": "Spidol",
+    "quantity": 50,
+    "price": 4000
+  },
+  {
+    "id": 4,
+    "name": "Penggaris",
+    "quantity": 10,
+    "price": 11000
   }
 ]

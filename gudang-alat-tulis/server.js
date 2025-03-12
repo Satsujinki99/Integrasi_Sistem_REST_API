@@ -1,4 +1,5 @@
-const express = require("express");
+// server.js
+const express = require('express');
 const app = express();
 const PORT = 3000;
 
@@ -7,11 +8,11 @@ app.use(express.json());
 
 // Routes
 const itemRoutes = require("./routes/items");
-app.use(express.json()); // Pastikan ini ada!
+const cartRoutes = require('./routes/cartRoutes');
+const orderRoutes = require('./routes/orderRoutes');
+app.use('/orders', orderRoutes);
+app.use('/cart', cartRoutes);
 app.use("/items", itemRoutes);
-
-
-
 app.get("/", (req, res) => {
     res.send("API Gudang Alat Tulis Berjalan!");
 });
