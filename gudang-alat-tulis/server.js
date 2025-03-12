@@ -2,7 +2,12 @@ const express = require("express");
 const app = express();
 const PORT = 3000;
 
-app.use(express.json()); // Middleware untuk parsing JSON
+// Middleware
+app.use(express.json());
+
+// Routes
+const itemRoutes = require("./routes/items");
+app.use("/items", itemRoutes);
 
 app.get("/", (req, res) => {
     res.send("API Gudang Alat Tulis Berjalan!");
