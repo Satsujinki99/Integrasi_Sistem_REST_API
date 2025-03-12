@@ -7,7 +7,10 @@ app.use(express.json());
 
 // Routes
 const itemRoutes = require("./routes/items");
+app.use(express.json()); // Pastikan ini ada!
 app.use("/items", itemRoutes);
+
+
 
 app.get("/", (req, res) => {
     res.send("API Gudang Alat Tulis Berjalan!");
