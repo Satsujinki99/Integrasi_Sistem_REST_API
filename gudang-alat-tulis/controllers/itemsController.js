@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 const Item = require("../models/Item");
-const Order = require("../models/Order");
 
 // **ITEM CONTROLLER**
 exports.getAllItems = async (req, res) => {
@@ -56,43 +55,3 @@ exports.deleteItem = async (req, res) => {
     }
 };
 
-// **ORDER CONTROLLER**
-exports.createOrder = async (req, res) => {
-    try {
-        const cart = await Cart.findOne({ userId: req.params.userId });
-        if (!cart || cart.items.length === 0) {
-            return res.status(400).json({ message: "Keranjang kosong" });
-        }
-        const totalAmount = cart.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-        const newOrder = new Order({
-            userId: req.params.userId,
-            items: cart.items,
-            totalAmount,
-            status: "pending"
-        });
-        await newOrder.save();
-        await Cart.findOneAndDelete({ userId: req.params.userId });
-        res.status(201).json(newOrder);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-};
-
-exports.getOrders = async (req, res) => {
-    try {
-        const orders = await Order.find({ userId: req.params.userId });
-        res.json(orders);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-};
-
-exports.updateOrderStatus = async (req, res) => {
-    try {
-        const order = await Order.findByIdAndUpdate(req.params.orderId, { status: req.body.status }, { new: true });
-        if (!order) return res.status(404).json({ message: "Pesanan tidak ditemukan" });
-        res.json(order);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-};
