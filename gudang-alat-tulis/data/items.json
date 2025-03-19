@@ -16,5 +16,23 @@
     "name": "Penggaris",
     "quantity": 10,
     "price": 11000
+  },
+  {
+    "id": 5,
+    "name": "Penghapus",
+    "quantity": 10,
+    "price": 11000
+  },
+  {
+    "id": 6,
+    "name": "Tes",
+    "quantity": 10,
+    "price": 11000
+  },
+  {
+    "id": 7,
+    "name": "Tes2",
+    "quantity": 10,
+    "price": 11000
   }
 ]
