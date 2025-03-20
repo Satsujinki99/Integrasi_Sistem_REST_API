@@ -59,40 +59,59 @@ exports.deleteItem = async (req, res) => {
 // **ORDER CONTROLLER**
 exports.createOrder = async (req, res) => {
     try {
-        const cart = await Cart.findOne({ userId: req.params.userId });
+        const cart = await Cart.findOne({ userId: req.params.userId }).populate("items.itemId");
+
         if (!cart || cart.items.length === 0) {
             return res.status(400).json({ message: "Keranjang kosong" });
         }
-        const totalAmount = cart.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+        let totalAmount = 0;
+
+        // Hitung total harga berdasarkan item yang ada di database
+        for (const cartItem of cart.items) {
+            const item = await Item.findById(cartItem.itemId);
+            if (!item) {
+                return res.status(404).json({ message: `Item dengan ID ${cartItem.itemId} tidak ditemukan` });
+            }
+            totalAmount += item.price * cartItem.quantity;
+        }
+
         const newOrder = new Order({
             userId: req.params.userId,
-            items: cart.items,
+            items: cart.items.map(i => ({ itemId: i.itemId, quantity: i.quantity })),
             totalAmount,
             status: "pending"
         });
+
         await newOrder.save();
+
+        // Hapus keranjang setelah pesanan dibuat
         await Cart.findOneAndDelete({ userId: req.params.userId });
-        res.status(201).json(newOrder);
+
+        res.status(201).json({ message: "Pesanan berhasil dibuat", order: newOrder });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ message: "Terjadi kesalahan", error });
     }
 };
 
 exports.getOrders = async (req, res) => {
     try {
-        const orders = await Order.find({ userId: req.params.userId });
+        const orders = await Order.find({ userId: req.params.userId }).populate("items.itemId");
         res.json(orders);
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ message: "Terjadi kesalahan", error });
     }
 };
 
 exports.updateOrderStatus = async (req, res) => {
     try {
-        const order = await Order.findByIdAndUpdate(req.params.orderId, { status: req.body.status }, { new: true });
+        const order = await Order.findById(req.params.orderId);
         if (!order) return res.status(404).json({ message: "Pesanan tidak ditemukan" });
-        res.json(order);
+
+        order.status = req.body.status;
+        await order.save();
+        res.json({ message: "Status pesanan diperbarui", order });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ message: "Terjadi kesalahan", error });
     }
 };

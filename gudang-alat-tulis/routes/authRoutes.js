@@ -8,7 +8,7 @@ const router = express.Router();
 router.post(
     "/register",
     [
-        check("name", "Nama harus diisi").not().isEmpty(),
+        check("username", "Nama harus diisi").not().isEmpty(),
         check("email", "Masukkan email yang valid").isEmail(),
         check("password", "Password minimal 6 karakter").isLength({ min: 6 }),
     ],

@@ -4,7 +4,7 @@ const User = require("../models/user");
 
 // Register User
 exports.register = async (req, res) => {
-    const { name, email, password } = req.body;
+    const { username, email, password } = req.body;
 
     // Validasi input
     const errors = validationResult(req);
@@ -13,14 +13,14 @@ exports.register = async (req, res) => {
     }
 
     try {
-        // Cek apakah email sudah ada
-        let user = await User.findOne({ email });
-        if (user) {
+        // Cek apakah email sudah ada (username bisa duplikat)
+        let existingUser = await User.findOne({ email });
+        if (existingUser) {
             return res.status(400).json({ message: "Email sudah digunakan" });
         }
 
         // Buat user baru
-        user = new User({ name, email, password });
+        const user = new User({ username, email, password });
         await user.save();
 
         res.json({ message: "Registrasi berhasil, silakan login" });
