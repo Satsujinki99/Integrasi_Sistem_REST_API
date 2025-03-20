@@ -21,11 +21,9 @@ mongoose.connect(process.env.MONGO_URI, {
 
 // Routes
 const itemRoutes = require("./routes/items");
-const orderRoutes = require("./routes/orderRoutes");
 const authRoutes = require("./routes/authRoutes");
 
 app.use("/", authRoutes);
-app.use("/orders", orderRoutes);
 app.use("/items", itemRoutes);
 
 

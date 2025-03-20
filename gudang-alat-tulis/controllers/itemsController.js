@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
-const Item = require("../models/Item");
-const Order = require("../models/Order");
+const Item = require("../models/Item").default;
 
 // **ITEM CONTROLLER**
 exports.getAllItems = async (req, res) => {
@@ -59,59 +58,40 @@ exports.deleteItem = async (req, res) => {
 // **ORDER CONTROLLER**
 exports.createOrder = async (req, res) => {
     try {
-        const cart = await Cart.findOne({ userId: req.params.userId }).populate("items.itemId");
-
+        const cart = await Cart.findOne({ userId: req.params.userId });
         if (!cart || cart.items.length === 0) {
             return res.status(400).json({ message: "Keranjang kosong" });
         }
-
-        let totalAmount = 0;
-
-        // Hitung total harga berdasarkan item yang ada di database
-        for (const cartItem of cart.items) {
-            const item = await Item.findById(cartItem.itemId);
-            if (!item) {
-                return res.status(404).json({ message: `Item dengan ID ${cartItem.itemId} tidak ditemukan` });
-            }
-            totalAmount += item.price * cartItem.quantity;
-        }
-
+        const totalAmount = cart.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
         const newOrder = new Order({
             userId: req.params.userId,
-            items: cart.items.map(i => ({ itemId: i.itemId, quantity: i.quantity })),
+            items: cart.items,
             totalAmount,
             status: "pending"
         });
-
         await newOrder.save();
-
-        // Hapus keranjang setelah pesanan dibuat
         await Cart.findOneAndDelete({ userId: req.params.userId });
-
-        res.status(201).json({ message: "Pesanan berhasil dibuat", order: newOrder });
+        res.status(201).json(newOrder);
     } catch (error) {
-        res.status(500).json({ message: "Terjadi kesalahan", error });
+        res.status(500).json({ message: error.message });
     }
 };
 
 exports.getOrders = async (req, res) => {
     try {
-        const orders = await Order.find({ userId: req.params.userId }).populate("items.itemId");
+        const orders = await Order.find({ userId: req.params.userId });
         res.json(orders);
     } catch (error) {
-        res.status(500).json({ message: "Terjadi kesalahan", error });
+        res.status(500).json({ message: error.message });
     }
 };
 
 exports.updateOrderStatus = async (req, res) => {
     try {
-        const order = await Order.findById(req.params.orderId);
+        const order = await Order.findByIdAndUpdate(req.params.orderId, { status: req.body.status }, { new: true });
         if (!order) return res.status(404).json({ message: "Pesanan tidak ditemukan" });
-
-        order.status = req.body.status;
-        await order.save();
-        res.json({ message: "Status pesanan diperbarui", order });
+        res.json(order);
     } catch (error) {
-        res.status(500).json({ message: "Terjadi kesalahan", error });
+        res.status(500).json({ message: error.message });
     }
 };
